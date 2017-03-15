@@ -4,18 +4,8 @@
 
 #include "BK.h"
 
-void printR(set<int> R)
-{
-    cout << "Maximal Clique found: " << endl;
-    cout << "[ ";
-    for (set<int>::iterator rt = R.begin(); rt != R.end(); rt++)
-        std::cout << *rt << " ";
-    cout << "] "<<  endl;
-    sumMCE++;
-}
-
 //bronkerbosch w/o pivot//
-void BronKerbosch1(set<int> R, set<int> P, set<int> X, int& recursiveCallCount)
+void BK1::BronKerbosch1(set<int> R, set<int> P, set<int> X, int& recursiveCallCount)
 {
     vector<node> &g = graph.g;
     if (P.size() == 0 && X.size() == 0)
@@ -53,7 +43,7 @@ void BronKerbosch1(set<int> R, set<int> P, set<int> X, int& recursiveCallCount)
 }
 
 //Bronkerbosch w/ pivot//
-void BronKerbosch2(set<int> R, set<int> P, set<int> X, int& recursiveCallCount)
+void BK2::BronKerbosch2(set<int> R, set<int> P, set<int> X, int& recursiveCallCount)
 {
     vector<node> &g = graph.g;
 

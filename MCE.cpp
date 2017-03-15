@@ -19,6 +19,7 @@ void MCE::init()
     graph.print();
 #endif
     vNum = n;
+    sumMCE = 0;
 }
 
 void MCE::printR(set<int> R)
@@ -37,6 +38,16 @@ void MCE::preprocessing() {
 
 void MCE::solve() {
     cout << "Error! Solve haven't been implemented!" << endl;
+}
+
+void MCE::run() {
+    auto start = high_resolution_clock::now();
+    init();
+    preprocessing();
+    solve();
+    cout << "Sum of all maximal clique:" << sumMCE << endl << endl;
+    cout << "finished.";
+    cout << duration_cast<milliseconds>(high_resolution_clock::now() - start).count() << "ms\n";
 }
 
 
