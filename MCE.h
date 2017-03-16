@@ -12,10 +12,11 @@ protected:
     int vNum;
     int sumMCE;
     int recursiveCount = 0;
+    int lb;
 public:
     void init();
     void printR(set<int> R);
-    void run();
+    void run(int limit);
     virtual void preprocessing();
     virtual void solve();
 };

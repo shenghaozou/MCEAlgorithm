@@ -24,12 +24,14 @@ void MCE::init()
 
 void MCE::printR(set<int> R)
 {
-    cout << "Maximal Clique found: " << endl;
-    cout << "[ ";
-    for (set<int>::iterator rt = R.begin(); rt != R.end(); rt++)
-        std::cout << *rt << " ";
-    cout << "] "<<  endl;
-    sumMCE++;
+    if(R.size() >= lb) {
+        cout << "Maximal Clique found: " << endl;
+        cout << "[ ";
+        for (set<int>::iterator rt = R.begin(); rt != R.end(); rt++)
+            std::cout << *rt << " ";
+        cout << "] " << endl;
+        sumMCE++;
+    }
 }
 
 void MCE::preprocessing() {
@@ -40,9 +42,11 @@ void MCE::solve() {
     cout << "Error! Solve haven't been implemented!" << endl;
 }
 
-void MCE::run() {
+void MCE::run(int i) {
     auto start = high_resolution_clock::now();
     init();
+    graph.setLowerBound(i);
+    lb = i;//just for debug! lb = i;
     preprocessing();
     solve();
     cout << "Sum of all maximal clique:" << sumMCE << endl << endl;

@@ -17,6 +17,6 @@ using namespace std;
 using namespace std::chrono;
 
 typedef set<int> node;
-#define DEBUG 0
+#define DEBUG 1
 #define FILE_NAME "brain3.edges"
 #endif //GRAD_BK_H

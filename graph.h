@@ -5,11 +5,12 @@ class Graph
 	private:
 		int nodes;
 		int edges;
-        int lb;//question here!
+        int lb = 0;
 	public:
 		vector<node> g;
         vector<bool> live;
 		void init(int vNum);
+        void setLowerBound(int limit){lb = limit;};
 		void createNode(int n, set<int> r) {
 			g[n] = r;
 		}
@@ -19,9 +20,9 @@ class Graph
 			g[n2_].insert(n1_);
 		}
 		void print();
-        inline void filterBasedOnDegree();
+        void filterBasedOnDegree();
         void filterBasedOnEdge();
         void filterBasedOnKcore();
         void deleteNode(int);
-        inline void kill();
+        void kill();
 };

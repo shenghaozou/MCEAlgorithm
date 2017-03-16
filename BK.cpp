@@ -46,6 +46,7 @@ void BK1::BronKerbosch1(set<int> R, set<int> P, set<int> X, int& recursiveCallCo
 void BK2::BronKerbosch2(set<int> R, set<int> P, set<int> X, int& recursiveCallCount)
 {
     vector<node> &g = graph.g;
+    vector<bool> &live = graph.live;
 
     if (P.size() == 0 && X.size() == 0) {
         printR(R);
@@ -63,36 +64,38 @@ void BK2::BronKerbosch2(set<int> R, set<int> P, set<int> X, int& recursiveCallCo
         set_difference(P.begin(), P.end(), g[*puxt].begin(), g[*puxt].end(), inserter(P_Nu, P_Nu.end()));
     }
 
-    for(set<int>::iterator v = P_Nu.begin(); v != P_Nu.end(); v)
-    {
+    for(set<int>::iterator v = P_Nu.begin(); v != P_Nu.end(); v){
         set<int> v_;	//create a singleton set {v}
-        v_.insert(*v);
+            v_.insert(*v);
 #if DEBUG
-        cout << "current V:"<< *v << endl;
+            cout << "current V:"<< *v << endl;
 #endif
 
-        set<int> RuV;
-        set<int> XuV;
-        set<int> PnNv;
-        set<int> XnNv;
-        set<int> P_v;
+            set<int> RuV;
+            set<int> XuV;
+            set<int> PnNv;
+            set<int> XnNv;
+            set<int> P_v;
 
-        RuV.clear(); XuV.clear(); PnNv.clear(); XnNv.clear(); P_v.clear();
+            RuV.clear();
+            XuV.clear();
+            PnNv.clear();
+            XnNv.clear();
+            P_v.clear();
 
-        set_union(R.begin(), R.end(), v_.begin(), v_.end(), inserter(RuV, RuV.end()));
-        set_intersection(P.begin(), P.end(), g[*v].begin(), g[*v].end(), inserter(PnNv, PnNv.end()));
-        set_intersection(X.begin(), X.end(), g[*v].begin(), g[*v].end(), inserter(XnNv, XnNv.end()));
+            set_union(R.begin(), R.end(), v_.begin(), v_.end(), inserter(RuV, RuV.end()));
+            set_intersection(P.begin(), P.end(), g[*v].begin(), g[*v].end(), inserter(PnNv, PnNv.end()));
+            set_intersection(X.begin(), X.end(), g[*v].begin(), g[*v].end(), inserter(XnNv, XnNv.end()));
 
-        BronKerbosch2(RuV, PnNv, XnNv, ++recursiveCallCount);
+            BronKerbosch2(RuV, PnNv, XnNv, ++recursiveCallCount);
 
-        //RuV.clear(); XuV.clear(); PnNv.clear(); XnNv.clear(); P_v.clear();
+            //RuV.clear(); XuV.clear(); PnNv.clear(); XnNv.clear(); P_v.clear();
 
-        P.erase(*v);
-        X.insert(*v);
-
-        if (P.empty())
-            return;
-        else
-            v = P.begin();
+            P.erase(*v);
+            X.insert(*v);
+            if (P.empty())
+                return;
+            else
+                v = P.begin();
     }
 }
