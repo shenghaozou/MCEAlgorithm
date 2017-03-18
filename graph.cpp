@@ -72,19 +72,43 @@ bool degreeCompare(vector<int> g, int a, int b)
     return g[a] < g[b];
 }
 
+void quickSort(vector<int> &orders, vector<int> &degrees, int l,int r){
+    int i, j, t, mid;
+    mid = orders[(l+r) >> 1];
+    i = l; j = r;
+    do{
+        while (degrees[orders[i]] < degrees[mid]) i++;
+        while (degrees[orders[j]] > degrees[mid]) j--;
+        if (i <= j) {
+            t = orders[i];
+            orders[i] = orders[j];
+            orders[j] = t;
+            i++; j--;
+        }
+    }
+    while (i <= j);
+    if (i < r) quickSort(orders, degrees, i,r);
+    if (l < j) quickSort(orders, degrees, l,j);
+}
+
 void Graph::filterBasedOnKcore() {//这里会修改图！需要复制一份过来！待修改！
     orders.resize(nodes);
     coreNumber.resize(nodes);
     vector<int> degrees(nodes);
     vector<bool> livePoints(nodes);
+    int* speedTest;
     int cur_core, max_core;
-
+#if GRAPH_DEBUG
+    cout << "k-core simplification." << endl;
+#endif
     livePoints = live;
-
     for(int i = 0; i < nodes; i++) orders[i] = i;
     kill();//杀死所有度为0的点。
     degrees = d;
-    sort(orders.begin(), orders.end(), bind(degreeCompare, degrees, _1, _2));//杀死后正序排序
+    cout << "t1" << endl;
+    quickSort(orders, degrees, 0, nodes - 1);
+    //sort(orders.begin(), orders.end(), bind(degreeCompare, degrees, _1, _2));//杀死后正序排序
+    cout << "t2" << endl;
     int i = 0;
     int remaining;
     while(!live[orders[i]] && i < nodes)i++;
@@ -124,14 +148,8 @@ void Graph::filterBasedOnKcore() {//这里会修改图！需要复制一份过�
 
                 for (set<int>::iterator v = g[curPoint].begin(); v != g[curPoint].end(); v++)
                     if(livePoints[*v]) degrees[*v]--;
-                /*sharedNeighbour.clear();
-                set_intersection(g[curPoint].begin(), g[curPoint].end(), orders.begin() + i, orders.end(),
-                                 inserter(sharedNeighbour, sharedNeighbour.end()));
-                for (set<int>::iterator v = sharedNeighbour.begin(); v != sharedNeighbour.end(); v++) {
-                    if (live[*v]) degrees[*v]--;
-                }
-                 */
-                sort(orders.begin() + i + 1, orders.end(), bind(degreeCompare, degrees, _1, _2));
+                quickSort(orders, degrees, i + 1, nodes - 1);
+                //sort(orders.begin() + i + 1, orders.end(), bind(degreeCompare, degrees, _1, _2));
                 /*
                 int temp, m;
                 for(int t = i + 1; t < nodes; t++){

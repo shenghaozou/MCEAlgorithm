@@ -5,15 +5,18 @@ void setPrint(set<int> x, string name);
 
 int main() 
 {
+    /*
 #if ANS_ANALYSIS
     set<set<int>> setBKz, setBK2, setz_2, set2_z;
     MCE *alg = new BK2();
     alg -> run(3);
     setBK2 = alg -> ans;
 #endif
-    MCE *alg2 = new BKz();
-    alg2 -> run(3);
+     */
 
+    MCE *alg2 = new BKz();
+    alg2 -> run(15);
+/*
 #if ANS_ANALYSIS
     setBKz = alg2 -> ans;
 
@@ -29,6 +32,7 @@ int main()
         setPrint(*v, "2-Z");
     }
 #endif
+ */
 
 	return 0;
 } 
