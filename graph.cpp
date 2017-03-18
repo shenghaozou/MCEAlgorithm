@@ -4,6 +4,7 @@ void Graph::init(int vNum) {
     nodes = vNum;
     g.resize(vNum);
     live.resize(vNum);
+    d.resize(vNum);
     fill(live.begin(), live.end(), true);
     for(int i = 0; i < vNum; i++) g[i].clear();
 };
@@ -25,7 +26,7 @@ void Graph::kill(){
 }
 
 void Graph::deleteNode(int i){
-#if DEBUG
+#if GRAPH_DEBUG
     cout << "Point Deleted:" << i << endl;
 #endif
     if(live[i]){
@@ -66,29 +67,34 @@ void Graph::filterBasedOnEdge(){
     kill();
 }
 
-bool degreeCompare(vector<node> g, int a, int b)
+bool degreeCompare(vector<int> g, int a, int b)
 {
-    return g[a].size() < g[b].size();
+    return g[a] < g[b];
 }
 
 void Graph::filterBasedOnKcore() {//这里会修改图！需要复制一份过来！待修改！
-    vector<int> orders(nodes);
-    vector<int> coreNumber(nodes);
-    set<int> sharedNeighbour;
-    vector<node> _g = g;
+    orders.resize(nodes);
+    coreNumber.resize(nodes);
+    vector<int> degrees(nodes);
+    vector<bool> livePoints(nodes);
     int cur_core, max_core;
+
+    livePoints = live;
 
     for(int i = 0; i < nodes; i++) orders[i] = i;
     kill();//杀死所有度为0的点。
-    sort(orders.begin(), orders.end(), bind(degreeCompare, _g, _1, _2));//杀死后正序排序
+    degrees = d;
+    sort(orders.begin(), orders.end(), bind(degreeCompare, degrees, _1, _2));//杀死后正序排序
     int i = 0;
     int remaining;
     while(!live[orders[i]] && i < nodes)i++;
     remaining = nodes - i;//我们假定，之前的点如果死了，那么度一定为0。
     if(i < nodes){
         int curPoint = orders[i];
-        cur_core = _g[curPoint].size();//cur_core>=1才对
-#if DEBUG
+        cur_core = degrees[curPoint];//cur_core>=1才对
+        livePoints[curPoint] = false;
+        coreNumber[curPoint] = cur_core;
+#if GRAPH_DEBUG
         cout << "k-core[" << curPoint << "]=" << cur_core << endl;
 #endif
         max_core = cur_core;
@@ -96,35 +102,59 @@ void Graph::filterBasedOnKcore() {//这里会修改图！需要复制一份过�
         while(i < nodes) {
             curPoint = orders[i];
             if (live[curPoint]) {
-                if (_g[curPoint].size() > cur_core) cur_core = _g[curPoint].size();
+                if (degrees[curPoint] > cur_core) cur_core = degrees[curPoint];
                 if (cur_core > max_core) max_core = cur_core;
+
+                livePoints[curPoint] = false;
+
                 coreNumber[curPoint] = cur_core;
-#if DEBUG
+#if GRAPH_DEBUG
                 cout << "k-core[" << curPoint << "]=" << cur_core << endl;
 #endif
-                if (g[curPoint].size() == nodes - i - 1) {
+                if (degrees[curPoint] == nodes - i - 1 || cur_core >= lb - 1) {
                     for (int j = i + 1; j < nodes; j++)
                     {
                         coreNumber[orders[j]] = cur_core;
-#if DEBUG
+#if GRAPH_DEBUG
                         cout << "k-core[" << orders[j] << "]=" << cur_core << endl;
 #endif
                     }
                     break;
                 }
-                sharedNeighbour.clear();
-                set_intersection(_g[curPoint].begin(), _g[curPoint].end(), orders.begin() + i, orders.end(),
+
+                for (set<int>::iterator v = g[curPoint].begin(); v != g[curPoint].end(); v++)
+                    if(livePoints[*v]) degrees[*v]--;
+                /*sharedNeighbour.clear();
+                set_intersection(g[curPoint].begin(), g[curPoint].end(), orders.begin() + i, orders.end(),
                                  inserter(sharedNeighbour, sharedNeighbour.end()));
-                for (set<int>::iterator v = _g[curPoint].begin(); v != _g[curPoint].end(); v++) {
-                    if (live[*v]) _g[*v].erase(curPoint);
+                for (set<int>::iterator v = sharedNeighbour.begin(); v != sharedNeighbour.end(); v++) {
+                    if (live[*v]) degrees[*v]--;
                 }
-                sort(orders.begin() + i + 1, orders.end(), bind(degreeCompare, _g, _1, _2));
+                 */
+                sort(orders.begin() + i + 1, orders.end(), bind(degreeCompare, degrees, _1, _2));
+                /*
+                int temp, m;
+                for(int t = i + 1; t < nodes; t++){
+                    m = t;
+                    while (m >= i + 2 && degrees[orders[m]] < degrees[orders[m - 1]]) m--;
+                */
+
+
             }
             i++;
         }
         int i = 0;
+#if GRAPH_DEBUG
+        cout << "LB:" << lb << endl;
+#endif
         while(i < nodes){
-            if (live[i] && coreNumber[i] < lb) deleteNode(i);
+            if (live[i] && coreNumber[i] < lb - 1) {
+#if GRAPH_DEBUG
+                cout << "LIVE(" << i << "):" << live[i] << endl;
+                cout << "CORE_NUM:" << coreNumber[i] << endl;
+#endif
+                deleteNode(i);
+            }
             i++;
         }
     }

@@ -12,6 +12,7 @@ public:
         P.clear();
         X.clear();
         R.clear();
+        for(int t = 0; t < vNum; t++) graph.d[t] = graph.g[t].size();
         graph.filterBasedOnDegree();
         //graph.filterBasedOnEdge();
         graph.filterBasedOnKcore();
@@ -26,7 +27,7 @@ private:
     set<int> P;
     set<int> X;
     set<int> R;
-    void BronKerboschz(set<int> R, set<int> P, set<int> X, int& recursiveCallCount);
+    void BronKerboschz(set<int> R, set<int> P, set<int> X, int recursiveCallCount);
 };
 
 

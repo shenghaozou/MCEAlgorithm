@@ -13,12 +13,16 @@ protected:
     int sumMCE;
     int recursiveCount = 0;
     int lb;
+
 public:
     void init();
     void printR(set<int> R);
     void run(int limit);
     virtual void preprocessing();
     virtual void solve();
+#if ANS_ANALYSIS
+    set<set<int>> ans;
+#endif
 };
 
 extern Graph graph;

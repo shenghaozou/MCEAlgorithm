@@ -9,6 +9,9 @@ class Graph
 	public:
 		vector<node> g;
         vector<bool> live;
+		vector<int> coreNumber;
+		vector<int> orders;
+		vector<int> d;
 		void init(int vNum);
         void setLowerBound(int limit){lb = limit;};
 		void createNode(int n, set<int> r) {

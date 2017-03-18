@@ -13,17 +13,19 @@ void MCE::init()
     graph.init(n);
     while(!f.eof()) {
         f >> t1 >> t2;
-        graph.createConnection(t1, t2);
+        if(t1 != t2) graph.createConnection(t1, t2);
     }
 #if DEBUG
     graph.print();
 #endif
     vNum = n;
     sumMCE = 0;
+    f.close();
 }
 
 void MCE::printR(set<int> R)
 {
+#if MCE_OUTPUT
     if(R.size() >= lb) {
         cout << "Maximal Clique found: " << endl;
         cout << "[ ";
@@ -31,7 +33,11 @@ void MCE::printR(set<int> R)
             std::cout << *rt << " ";
         cout << "] " << endl;
         sumMCE++;
+#if ANS_ANALYSIS
+        ans.insert(R);
+#endif
     }
+#endif
 }
 
 void MCE::preprocessing() {
