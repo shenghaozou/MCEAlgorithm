@@ -3,10 +3,9 @@ using namespace std::placeholders;
 class Graph 
 {
 	private:
-		int nodes;
-		int edges;
         int lb = 0;
 	public:
+		int nodes;
 		vector<node> g;
         vector<bool> live;
 		vector<int> coreNumber;

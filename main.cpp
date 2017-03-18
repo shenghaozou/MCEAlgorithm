@@ -15,7 +15,7 @@ int main()
      */
 
     MCE *alg2 = new BKz();
-    alg2 -> run(15);
+    alg2 -> run(10);
 /*
 #if ANS_ANALYSIS
     setBKz = alg2 -> ans;

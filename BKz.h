@@ -16,6 +16,7 @@ public:
         graph.filterBasedOnDegree();
         //graph.filterBasedOnEdge();
         graph.filterBasedOnKcore();
+        for(int t = 0; t < vNum; t++) graph.d[t] = graph.g[t].size();
         for (int i = 0; i < vNum;i++) if(graph.live[i]) P.insert(i);
 
 
@@ -24,6 +25,7 @@ public:
         BronKerboschz(R, P, X, recursiveCount);
     }
 private:
+    void getBranch(set<int> &branch, set<int> &currentP, int currentLB);
     set<int> P;
     set<int> X;
     set<int> R;

@@ -45,6 +45,7 @@ void Graph::filterBasedOnDegree() {
 void Graph::filterBasedOnEdge(){
     set<int> unionOf;
     bool flag;
+    int erased;
     for( int i = 0; i < nodes; i++) if(live[i])
             for(set<int>::iterator v = g[i].begin(); v != g[i].end(); v) if(live[*v] && i < (*v)){
                     flag = true;
@@ -57,8 +58,9 @@ void Graph::filterBasedOnEdge(){
 #if DEBUG
                         cout << "Erased:" << *v << "," << i << endl;
 #endif
-                        g[i].erase(*v);
-                        g[*v].erase(i);
+                        erased = *v;
+                        g[i].erase(erased);
+                        g[erased].erase(i);
                         v = g[i].begin();
                         while(v != g[i].end() && !live[*v]) v++;
                         if (v == g[i].end()) break;
