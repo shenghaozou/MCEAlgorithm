@@ -1,4 +1,4 @@
-#MCE Algorithm
+# MCE Algorithm
  This is my research project for Maximal Clique Enumeration(MCE) algorithm. The goal of my algorithm is to enumerate all maximal clique larger than size *k*.
  
  In my algorithm, I combined three preprocessing preocedure:
