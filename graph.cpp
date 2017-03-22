@@ -43,29 +43,34 @@ void Graph::filterBasedOnDegree() {
 }
 
 void Graph::filterBasedOnEdge(){
-    set<int> unionOf;
+    vector<int> pool(nodes);
     bool flag;
     int erased;
-    for( int i = 0; i < nodes; i++) if(live[i])
+    pool.clear();
+    fill(pool.begin(), pool.end(), -1);
+    for( int i = 0; i < nodes; i++) if(live[i]){
+            for(set<int>::iterator v = g[i].begin(); v != g[i].end(); v++) if(live[*v]) pool[*v] = i;
             for(set<int>::iterator v = g[i].begin(); v != g[i].end(); v) if(live[*v] && i < (*v)){
-                    flag = true;
-                    if ((int)(g[i].size()) >= lb - 1 && (int)(g[*v].size()) >= lb - 1){
-                        unionOf.clear();
-                        set_union(g[i].begin(), g[i].end(), g[*v].begin(), g[*v].end(), inserter(unionOf, unionOf.end()));
-                        if((int)(unionOf.size()) >= lb - 2) flag = false;
-                    }
-                    if(flag){
-#if DEBUG
-                        cout << "Erased:" << *v << "," << i << endl;
+                    int num = *v;
+                    int sum = 0;
+                    bool delFlag = true;
+                    for(set<int>::iterator t = g[num].begin(); t != g[num].end(); t++) if(live[*t] && pool[*t] >= i) {
+                            sum++;
+                            if(sum >= lb - 2) {
+                                delFlag = false;
+                                break;
+                            }
+                        }
+                    v++;
+                    if(delFlag){
+#if GRAPH_DEBUG
+                        cout << "Erased Edge:" << i << "," << num << endl;
 #endif
-                        erased = *v;
-                        g[i].erase(erased);
-                        g[erased].erase(i);
-                        v = g[i].begin();
-                        while(v != g[i].end() && !live[*v]) v++;
-                        if (v == g[i].end()) break;
-                    } else v++;
+                        g[i].erase(num);
+                        g[num].erase(i);
+                    }
                 } else v++;
+        }
     kill();
 }
 
