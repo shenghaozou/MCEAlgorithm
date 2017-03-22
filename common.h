@@ -19,7 +19,7 @@ using namespace std::chrono;
 
 typedef set<int> node;
 #define DEBUG 0
-#define GRAPH_DEBUG 1
+#define GRAPH_DEBUG 0
 #define MCE_OUTPUT 1
 #define ANS_ANALYSIS 0
 #define REPEAT_ANALYSIS 0

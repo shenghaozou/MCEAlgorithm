@@ -29,7 +29,7 @@ private:
     set<int> X;
     set<int> R;
     void BronKerboschz(set<int> R, set<int> P, set<int> X, int recursiveCallCount);
-    void pivotSelection(set<int> &P_Nu, set<int> &X);
+    void pivotSelection(set<int> &, set<int> &, vector<int> &, int);
 };
 
 

@@ -15,7 +15,7 @@ int main()
 #endif
 
 
-    MCE *alg2 = new BKz();
+    MCE *alg2 = new BKz2();
     alg2 -> run(8);
 
 #if ANS_ANALYSIS

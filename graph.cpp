@@ -52,9 +52,9 @@ void Graph::filterBasedOnEdge(){
             for(set<int>::iterator v = g[i].begin(); v != g[i].end(); v++) if(live[*v]) pool[*v] = i;
             for(set<int>::iterator v = g[i].begin(); v != g[i].end(); v) if(live[*v] && i < (*v)){
                     int num = *v;
-                    int sum = 0;
+                     int sum = 0;
                     bool delFlag = true;
-                    for(set<int>::iterator t = g[num].begin(); t != g[num].end(); t++) if(live[*t] && pool[*t] >= i) {
+                    for(set<int>::iterator t = g[num].begin(); t != g[num].end(); t++) if(live[*t]  && pool[*t] >= i) {
                             sum++;
                             if(sum >= lb - 2) {
                                 delFlag = false;
