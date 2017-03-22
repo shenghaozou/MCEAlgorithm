@@ -4,21 +4,82 @@
 
 
 
-#include "BKz.h"
+#include "BKz2.h"
 void quickSort(vector<int> &orders, vector<int> &degrees, int l,int r);
 
-void setPrint(set<int> x, string name)
+void setPrint(set<int> x, string name);
+
+void BKz2::pivotSelection(set<int> &P_Nu,set <int> &X)
 {
-    cout << "Set " << name << ":";
-    for (set<int>::iterator v = x.begin(); v != x.end(); v++)
-        cout << *v << " ";
-    cout << endl;
+    enum Status{Dead = 0, Protected, Center, Selected, Shared};
+    vector<Status> pivot;
+    vector<int> pivotNum;
+    static vector<int> pointMap(graph.nodes);
+    set<int> selected;
+    vector<int> temp;
+    vector<node> &g = graph.g;
+    set<int> tempP_Nu;
+    int index = 0;
+    set<int>::iterator i;
+    selected.clear();
+    fill(pointMap.begin(), pointMap.end(), -1);
+    pivotNum.clear();
+
+    int smallest = 0;
+    for(i = P_Nu.begin(); i != P_Nu.end(); i++){
+        int num = *i;
+        if(pointMap[num] == -1) {
+            pointMap[num] = index++;
+            pivot.push_back(Center);
+            pivotNum.push_back(num);
+        }//check whether it is right!
+    }
+    for(i = X.begin(); i != X.end(); i++){
+        int num = *i;
+        if(pointMap[num] == -1) {
+            pointMap[num] = index++;
+            pivot.push_back(Center);
+            pivotNum.push_back(num);
+        }//check whether it is right!
+    }
+    while(smallest < index){
+        temp.clear();
+        int realNum = pivotNum[smallest];
+        pivot[smallest] = Selected;
+        for(i = g[realNum].begin(); i != g[realNum].end(); i++)
+        {
+            int num = *i;
+            int mapedNum = pointMap[num];
+            if (mapedNum != -1){
+                temp.push_back(num);
+                pivot[mapedNum] = Dead;
+            }
+        } // Kill points
+        for (vector<int>::iterator i = temp.begin(); i != temp.end(); i++)
+            for (set<int>::iterator t = g[*i].begin(); t != g[*i].end(); t++){
+                int num = *t;
+                int mapedNum = pointMap[num];
+                if (mapedNum != -1 && pivot[mapedNum] == Center) pivot[mapedNum] = Protected;
+            } // Protect points
+        smallest++;
+        while(smallest < index && pivot[smallest] != Center) smallest++;
+    }
+    for(int i = 0; i < index; i++){
+        if(pivot[i] == Selected || pivot[i] == Protected){
+            tempP_Nu.insert(pivotNum[i]);
+            //set_difference(P_Nu.begin(), P_Nu.end(), g[pivotNum[i]].begin(), g[pivotNum[i]].end(),inserter(tempP_Nu, tempP_Nu.end()));
+        }
+    }
+    P_Nu = tempP_Nu;
+
+
 }
 
-void BKz::BronKerboschz(set<int> R, set<int> P, set<int> X, int recursiveCallCount)
+void BKz2::BronKerboschz(set<int> R, set<int> P, set<int> X, int recursiveCallCount)
 {
     vector<node> &g = graph.g;
     vector<bool> &live = graph.live;
+
 #if DEBUG
     cout << "level:" << recursiveCallCount << endl;
     setPrint(R,"R");
@@ -53,7 +114,7 @@ void BKz::BronKerboschz(set<int> R, set<int> P, set<int> X, int recursiveCallCou
      */
 
     if (P.size() + R.size() < lb) return;
-    // This is for lb <= 2!!!
+
 
     if(PuX.size() != 0) {
         set<int>::iterator puxt = PuX.begin();
@@ -64,34 +125,13 @@ void BKz::BronKerboschz(set<int> R, set<int> P, set<int> X, int recursiveCallCou
 #endif
     }
 
-
-/*
-    set<int> _P_Nu;
-    if(PuX.size() != 0){
-        if(lb >= 3 + R.size()) {
-            getBranch(P_Nu, P, lb - R.size() - 1);
-
-            set<int>::iterator puxt = _P_Nu.begin();
-            set_difference(_P_Nu.begin(), _P_Nu.end(), g[*puxt].begin(), g[*puxt].end(), inserter(P_Nu, P_Nu.end()));
+    /*
+    P_Nu = P;
+    pivotSelection(P_Nu, X);
 #if DEBUG
-            cout << "Current u:" << *puxt << endl;
-            setPrint(P, "current P");
-            setPrint(_P_Nu,"colored P");
-            setPrint(P_Nu,"P-N(u)");
+    setPrint(P_Nu, "P_Nu");
 #endif
-
-        }
-        else{
-            set<int>::iterator puxt = PuX.begin();
-            set_difference(P.begin(), P.end(), g[*puxt].begin(), g[*puxt].end(), inserter(P_Nu, P_Nu.end()));
-#if DEBUG
-            cout << "Current u:" << *puxt << endl;
-        setPrint(P_Nu,"P-N(u)");
-#endif
-        }
-    }
-
-*/
+     */
 
     for(set<int>::iterator v = P_Nu.begin(); v != P_Nu.end(); v){
         set<int> v_;	//create a singleton set {v}
@@ -139,40 +179,5 @@ void BKz::BronKerboschz(set<int> R, set<int> P, set<int> X, int recursiveCallCou
     }
 }
 
-void BKz::getBranch(set<int> &branch, set<int> &currentP, int currentUB) {
-    vector<int> coloredPoint(graph.nodes);
-    vector<set<int>> colors(currentP.size());
-    vector<int> orders(currentP.size());
-    set<int> NvnP;
-    vector<node> &g = graph.g;
-    vector<bool> colorPool(currentUB + 1);
-#if DEBUG
-    cout << "getBranch is running." << endl;
-#endif
-    int minColor, point;
-    fill(coloredPoint.begin(), coloredPoint.end(), 0);
-
-    branch.clear();
-    copy(currentP.begin(), currentP.end(), orders.begin());
-    quickSort(orders, graph.d, 0, currentP.size() - 1);
-    int i = currentP.size() - 1;
-    while(i >= 0){
-        int v = orders[i];
-        fill(colorPool.begin(), colorPool.end(), true);
-        colorPool[0] = false;
-        NvnP.clear();
-        set_intersection(g[v].begin(), g[v].end(), currentP.begin(), currentP.end(), inserter(NvnP, NvnP.end()));
-        for(set<int>::iterator t = NvnP.begin(); t != NvnP.end(); t++) colorPool[coloredPoint[*t]] = false;
-        for(minColor = 0; minColor <= currentUB; minColor++) if(colorPool[minColor]) break;
-        if (minColor <= currentUB)
-            coloredPoint[v] = minColor;
-        else
-            branch.insert(v);
-        i--;
-    }
-#if DEBUG
-    cout << "getBranch finished." << endl;
-#endif
-}
 
 

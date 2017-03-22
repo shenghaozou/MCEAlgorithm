@@ -13,6 +13,7 @@
 #include <chrono>
 #include <string>
 #include <iostream>
+#include <assert.h>
 using namespace std;
 using namespace std::chrono;
 
@@ -21,5 +22,6 @@ typedef set<int> node;
 #define GRAPH_DEBUG 0
 #define MCE_OUTPUT 1
 #define ANS_ANALYSIS 1
-#define FILE_NAME "cod.edges"
+#define REPEAT_ANALYSIS 0
+#define FILE_NAME "brain3.edges"
 #endif //GRAD_BK_H

@@ -23,6 +23,9 @@ public:
 #if ANS_ANALYSIS
     set<set<int>> ans;
 #endif
+#if REPEAT_ANALYSIS
+    set<set<int>> ans2;
+#endif
 };
 
 extern Graph graph;

@@ -36,6 +36,11 @@ void MCE::printR(set<int> R)
 #if ANS_ANALYSIS
         ans.insert(R);
 #endif
+#if REPEAT_ANALYSIS
+        if(ans2.find(R) != ans2.end()) ans2.insert(R);
+        else
+        assert("ERROR! REPEATED VALUE!");
+#endif
     }
 #endif
 }
