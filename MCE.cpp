@@ -27,11 +27,37 @@ void MCE::printR(set<int> R)
 {
 #if MCE_OUTPUT
     if(R.size() >= lb) {
-        cout << "Maximal Clique found: " << endl;
-        cout << "[ ";
+        //cout << "Maximal Clique found: " << endl;
+        fo << "["; //cout << "[ ";
         for (set<int>::iterator rt = R.begin(); rt != R.end(); rt++)
-            std::cout << *rt << " ";
-        cout << "] " << endl;
+            fo << *rt << " ";
+            //std::cout << *rt << " ";
+        //cout << "] " << endl;
+        fo << "]" << endl;
+        sumMCE++;
+#if ANS_ANALYSIS
+        ans.insert(R);
+#endif
+#if REPEAT_ANALYSIS
+        if(ans2.find(R) != ans2.end()) ans2.insert(R);
+        else
+        assert("ERROR! REPEATED VALUE!");
+#endif
+    }
+#endif
+}
+
+void MCE::printR(vector<int> R)
+{
+#if MCE_OUTPUT
+    if(R.size() >= lb) {
+        //cout << "Maximal Clique found: " << endl;
+        fo << "["; //cout << "[ ";
+        for (vector<int>::iterator rt = R.begin(); rt != R.end(); rt++)
+            fo << *rt << " ";
+        //std::cout << *rt << " ";
+        //cout << "] " << endl;
+        fo << "]" << endl;
         sumMCE++;
 #if ANS_ANALYSIS
         ans.insert(R);
@@ -56,6 +82,7 @@ void MCE::solve() {
 void MCE::run(int i) {
     auto start = high_resolution_clock::now();
     init();
+    fo.open("ans.txt");
     graph.setLowerBound(i);
     lb = i;//just for debug! lb = i;
     preprocessing();
@@ -63,6 +90,7 @@ void MCE::run(int i) {
     cout << "Sum of all maximal clique:" << sumMCE << endl << endl;
     cout << "finished.";
     cout << duration_cast<milliseconds>(high_resolution_clock::now() - start).count() << "ms\n";
+    fo.close();
 }
 
 

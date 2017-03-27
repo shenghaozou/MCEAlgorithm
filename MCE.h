@@ -13,10 +13,13 @@ protected:
     int sumMCE;
     int recursiveCount = 0;
     int lb;
+    ofstream fo;
 
 public:
     void init();
     void printR(set<int> R);
+    void printR(vector<int> R);
+    void printR(vector<bool> R);
     void run(int limit);
     virtual void preprocessing();
     virtual void solve();

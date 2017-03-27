@@ -2,6 +2,7 @@
 #include "BK.h"
 #include "BKz.h"
 #include "BKz2.h"
+#include "BKz3.h"
 void setPrint(set<int> x, string name);
 
 int main() 
@@ -9,14 +10,14 @@ int main()
 
 #if ANS_ANALYSIS
     set<set<int>> setBKz, setBK2, setz_2, set2_z;
-    MCE *alg = new BKz2();
+    MCE *alg = new BKz3();
     alg -> run(8);
     setBK2 = alg -> ans;
 #endif
 
 
-    MCE *alg2 = new BKz2();
-    alg2 -> run(8);
+    MCE *alg2 = new BKz3();
+    alg2 -> run(10);
 
 #if ANS_ANALYSIS
     setBKz = alg2 -> ans;
