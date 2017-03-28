@@ -67,7 +67,7 @@ void BKz3::pivotSelection2(set<int> &P,set <int> &X, vector<int> &P_Nu, int curr
         fill(occupied.begin(), occupied.end(), -1);
         for (set<int>::iterator v = g[rnum].begin(); v != g[rnum].end(); v++) {
             int cnum = r2c[*v];
-            if (cnum != -1 && color[cnum] != -1) occupied[color[cnum]] = occupied[color[cnum]] == -1 ? i : -2;
+            if (cnum != -1 && color[cnum] != -1) occupied[color[cnum]] = occupied[color[cnum]] == -1 ? cnum : -2;
         }
         while (selected < currentLB - 1 && occupied[selected] != -1) selected++;
         if (selected >= currentLB - 1)
@@ -83,12 +83,13 @@ void BKz3::pivotSelection2(set<int> &P,set <int> &X, vector<int> &P_Nu, int curr
                         int cnumNei = r2c[*v];
                         if (cnumNei != -1 && color[cnumNei] != -1) renumber[color[cnumNei]] = false;
                     }
+                    selected = 0;
                     while (selected < currentLB - 1 && !renumber[selected]) selected++;
                     if (selected < currentLB - 1) {
                         color[cnum] = selected;
                         color[i] = newColor;
                         successfulRenumber = true;
-                        cout << "successful ReColor!" << endl;
+                        //cout << "successful ReColor!" << endl;
                         break;
                     }
                 }
