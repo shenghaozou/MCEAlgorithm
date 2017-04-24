@@ -73,7 +73,7 @@ void BKz3::pivotSelection2(set<int> &P,set <int> &X, vector<int> &P_Nu, int curr
         if (selected >= currentLB - 1)
         {
             bool successfulRenumber = false;
-            for(int newColor = 0; newColor < currentLB - 1; newColor++){
+            for(int newColor = 0; newColor < currentLB - 1; newColor++){ 
                 if (occupied[newColor] >= 0) {
                     fill(renumber.begin(), renumber.end(), true);
                     renumber[newColor] = false;

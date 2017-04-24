@@ -79,16 +79,6 @@ void BKz2::BronKerboschz(set<int> R, set<int> P, set<int> X, int recursiveCallCo
         }
     }
 
-/*
-    if(PuX.size() != 0) {
-        set<int>::iterator puxt = PuX.begin();
-        set_difference(P.begin(), P.end(), g[*puxt].begin(), g[*puxt].end(), inserter(P_Nu, P_Nu.end()));
-#if DEBUG
-        cout << "Current u:" << *puxt << endl;
-        setPrint(P_Nu,"P-N(u)");
-#endif
-        }
-       */
 
     for(vector<int>::iterator v = P_Nu.begin(); v != P_Nu.end(); v++){
         set<int> v_;	//create a singleton set {v}

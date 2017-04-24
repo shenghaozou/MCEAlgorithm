@@ -112,10 +112,10 @@ void Graph::filterBasedOnKcore() {//这里会修改图！需要复制一份过�
     for(int i = 0; i < nodes; i++) orders[i] = i;
     kill();//杀死所有度为0的点。
     degrees = d;
-    cout << "t1" << endl;
+
     quickSort(orders, degrees, 0, nodes - 1);
     //sort(orders.begin(), orders.end(), bind(degreeCompare, degrees, _1, _2));//杀死后正序排序
-    cout << "t2" << endl;
+
     int i = 0;
     int remaining;
     while(!live[orders[i]] && i < nodes)i++;
@@ -139,49 +139,121 @@ void Graph::filterBasedOnKcore() {//这里会修改图！需要复制一份过�
                 livePoints[curPoint] = false;
 
                 coreNumber[curPoint] = cur_core;
-#if GRAPH_DEBUG
-                cout << "k-core[" << curPoint << "]=" << cur_core << endl;
-#endif
+
                 if (degrees[curPoint] == nodes - i - 1 || cur_core >= lb - 1) {
-                    for (int j = i + 1; j < nodes; j++)
-                    {
-                        coreNumber[orders[j]] = cur_core;
-#if GRAPH_DEBUG
-                        cout << "k-core[" << orders[j] << "]=" << cur_core << endl;
-#endif
-                    }
+                    for (int j = i + 1; j < nodes; j++) coreNumber[orders[j]] = cur_core;
                     break;
                 }
 
                 for (set<int>::iterator v = g[curPoint].begin(); v != g[curPoint].end(); v++)
                     if(livePoints[*v]) degrees[*v]--;
                 quickSort(orders, degrees, i + 1, nodes - 1);
-                //sort(orders.begin() + i + 1, orders.end(), bind(degreeCompare, degrees, _1, _2));
-                /*
-                int temp, m;
-                for(int t = i + 1; t < nodes; t++){
-                    m = t;
-                    while (m >= i + 2 && degrees[orders[m]] < degrees[orders[m - 1]]) m--;
-                */
-
-
             }
             i++;
         }
         int i = 0;
-#if GRAPH_DEBUG
-        cout << "LB:" << lb << endl;
-#endif
+
         while(i < nodes){
-            if (live[i] && coreNumber[i] < lb - 1) {
-#if GRAPH_DEBUG
-                cout << "LIVE(" << i << "):" << live[i] << endl;
-                cout << "CORE_NUM:" << coreNumber[i] << endl;
-#endif
-                deleteNode(i);
-            }
+            if (live[i] && coreNumber[i] < lb - 1) deleteNode(i);
             i++;
         }
     }
     kill();
 }
+
+int Graph::kcoreMini() {
+    orders.resize(nodes);
+    coreNumber.resize(nodes);
+    vector<int> degrees(nodes);
+    vector<bool> livePoints(nodes);
+    int* speedTest;
+    int cur_core, max_core;
+    vector<int> temp;
+
+    livePoints = live;
+    for(int i = 0; i < nodes; i++) orders[i] = i;
+    degrees = d;
+
+    quickSort(orders, degrees, 0, nodes - 1);
+
+    //for(int i = 0; i < nodes; i++)
+    //    cout << "[" << orders[i] << "] " << degrees[orders[i]] << " ";
+    //cout << endl;
+
+    int i = 0;
+    if(i < nodes) {
+        int curPoint = orders[i];
+        cur_core = degrees[curPoint];//cur_core>=1才对
+        livePoints[curPoint] = false;
+        coreNumber[curPoint] = cur_core;
+        max_core = cur_core;
+        while (i < nodes) {
+            curPoint = orders[i];
+            //cout << "choose:[" << curPoint << "]" << degrees[curPoint] << endl;
+
+            if (live[curPoint]) {
+                if (degrees[curPoint] > cur_core) cur_core = degrees[curPoint];
+                if (cur_core > max_core) max_core = cur_core;
+                //cout << "cur_core[" << curPoint << "]=" << cur_core << endl;
+
+                livePoints[curPoint] = false;
+
+                coreNumber[curPoint] = cur_core;
+
+                if (degrees[curPoint] == nodes - i - 1) {
+                    for (int j = i + 1; j < nodes; j++)
+                    {
+                        coreNumber[orders[j]] = cur_core;
+                        if(livePoints[orders[j]]) temp.push_back(orders[j]);
+                        else cout << "Someone dead! HELP!" << endl;
+                    }
+                    //maximalClique(temp);
+                    cout << "Final:" << nodes - i << endl;
+                    return nodes - i;
+                }
+
+                for (set<int>::iterator v = g[curPoint].begin(); v != g[curPoint].end(); v++)
+                    if (livePoints[*v]) degrees[*v]--;
+                quickSort(orders, degrees, i + 1, nodes - 1);
+                //for(int t = i+1; t < nodes; t++)
+                //    cout << "[" << orders[t] << "] " << degrees[orders[t]] << " ";
+                //cout << endl;
+            }
+            i++;
+        }
+    }
+
+    return 0;
+}
+
+void Graph::maximalClique(vector<int> &t) {
+    for(vector<int>::iterator x = t.begin(); x != t.end(); x++){
+        int num = *x;
+        vector<int>::iterator y = x + 1;
+        for(;y != t.end(); y++){
+            int num2 = *y;
+            if(find(g[num].begin(), g[num].end(), num2) == g[num].end())
+            {
+                cout << "Cannot find:" << num << "," << num2 << endl;
+
+                for(int i = 0; i < nodes; i++){
+                    cout << i << ":";
+                    for(set<int>::iterator v = g[i].begin(); v != g[i].end(); v++)
+                        cout << *v << ",";
+                    cout << endl;
+                }
+                assert(0);
+            }
+        }
+    }
+    cout << t.size() << " Pass!" << endl;
+    for(int i = 0; i < nodes; i++) {
+        cout << i << ":";
+        for (set<int>::iterator v = g[i].begin(); v != g[i].end(); v++)
+            cout << *v << ",";
+        cout << endl;
+    }
+
+}
+
+

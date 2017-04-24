@@ -3,11 +3,18 @@
 #include "BKz.h"
 #include "BKz2.h"
 #include "BKz3.h"
+#include "experiment.h"
+
 void setPrint(set<int> x, string name);
+
+void satTest();
 
 int main() 
 {
+    satTest();
 
+
+/*
 #if ANS_ANALYSIS
     set<set<int>> setBKz, setBK2, setz_2, set2_z;
     MCE *alg = new BKz3();
@@ -34,7 +41,7 @@ int main()
         setPrint(*v, "2-Z");
     }
 #endif
-
+*/
 
 	return 0;
 } 

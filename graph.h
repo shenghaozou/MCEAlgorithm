@@ -1,6 +1,9 @@
 #include "common.h"
 using namespace std::placeholders;
-class Graph 
+#ifndef GRAD_GRAPH_H
+#define GRAD_GRAPH_H
+
+class Graph
 {
 	private:
         int lb = 0;
@@ -25,8 +28,11 @@ class Graph
         void filterBasedOnDegree();
         void filterBasedOnEdge();
         void filterBasedOnKcore();
+		int kcoreMini();
         void deleteNode(int);
         void kill();
+		void maximalClique(vector<int> &t);
 
         //void quickSort(vector<int> &, int, int);
 };
+#endif
