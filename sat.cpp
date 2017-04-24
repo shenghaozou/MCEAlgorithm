@@ -31,19 +31,23 @@ void Sat::init(bool firstTime) {//after add Clause
 
 bool Sat::up(int t) {
     nodeSat tmp;
+    nodeQueue tmpQ;
     tmp.var = toVar(t);
     tmp.reason = 0;
-    reason[toVar(t)] = tmp;
     assert(t != 0);
-    queue<int> q;
-    q.push(t);
+    queue<nodeQueue> q;
+    tmpQ.lit = t;
+    tmpQ.reasonClause = -1;
+    q.push(tmpQ);
     while(!q.empty()) {
-        int n = q.front();
-        cout << "Current:" << n << endl;
+        nodeQueue n_ = q.front();
+        int n = n_.lit;
+        cout << "Current:" << n << " Reason Clause:" << n_.reasonClause << endl;
         debug();
         q.pop();
         tmp.var = toVar(n);
         if (alive[toVar(n)]) {
+            reason[toVar(n)] = n_.reasonClause;
             vector<vector<int>> *_posWatches = n > 0 ? &posWatches : &negWatches;
             vector<vector<int>> *_negWatches = n > 0 ? &negWatches : &posWatches;
             alive[toVar(n)] = false;
@@ -60,14 +64,16 @@ bool Sat::up(int t) {
                 if (data[cindex].relax) {
                     int lit = 0;
                     bool res = true;
-                    tmp.reason = cindex;
+                    //tmp.reason = cindex;
                     for (vector<int>::iterator t = data[cindex].data.begin(); t != data[cindex].data.end(); t++) {
                         if (toVar(*t) != toVar(n)) {
-                            reason[toVar(*t)] = tmp;
+                            //reason[toVar(*t)] = tmp;
                             cout << "Relax Option:" << endl;
                             assert(*t != 0);
-                            cout << -*t << " entered the queue." << endl;
-                            q.push(-*t);
+                            cout << -*t << " entered the queue with reason clause" << cindex << endl;
+                            tmpQ.lit = -*t;
+                            tmpQ.reasonClause = cindex;
+                            q.push(tmpQ);
                         }
                     }
                 }
@@ -83,12 +89,14 @@ bool Sat::up(int t) {
                         for (vector<int>::iterator t = data[cindex].data.begin(); t != data[cindex].data.end(); t++)
                             if (alive[toVar(*t)] && toVar(*t) != toVar(n)) lit = *t;
                         assert(lit != 0);
-                        tmp.reason = cindex;
-                        reason[toVar(lit)] = tmp;
+                        //tmp.reason = cindex;
+                        //reason[toVar(lit)] = tmp;
                         data[cindex].alive--;
                         assert(lit != 0);
-                        cout << lit << " entered the queue." << endl;
-                        q.push(lit);
+                        cout << lit << " entered the queue with reason clause" << cindex << endl;
+                        tmpQ.lit = lit;
+                        tmpQ.reasonClause = cindex;
+                        q.push(tmpQ);
                     } else {
                         failed = toVar(n);
                         failed_index = cindex;
@@ -124,8 +132,8 @@ void Sat::relax(int upLit) {
                 cout << endl << "relax variable " << var << " from clauses " << f << " whose size is "
                      << data[f].data.size() << endl;
                 assert(var < nodes);
-                int cindex = reason[var].reason;
-                if (!seen[cindex]) {
+                int cindex = reason[var];
+                if (cindex >= 0 && !seen[cindex]) {
                     q.push(cindex);
                     cout << cindex << " is pushed" << endl;
                 } else cout << cindex << " is skipped" << endl;
@@ -176,7 +184,7 @@ void Sat::debug() {
     }
     cout << "Conflict:" << endl;
     for(int i = 0; i < nodes; i++){
-        cout << i << " var:" << reason[i].var << " reason clause index:" << reason[i].reason << endl;
+        cout << i << " var:" << i << " reason clause index:" << reason[i] << endl;
     }
 }
 
@@ -202,6 +210,7 @@ void satTest(){
     s.debug();
     if(!s.up(up)){
         cout << "RELAX!" << endl;
+        s.debug();
         s.relax(up);
         cout << "RELAX FINISHED." << endl;
         s.init(false);
