@@ -12,6 +12,10 @@ struct nodeSat{
     int var;
 };
 
+struct nodeQueue{
+    int lit;
+    int reasonClause;
+};
 
 
 struct clause{
@@ -46,7 +50,7 @@ private:
     vector<vector<int>> posWatches, negWatches;
     vector<clause> data;
     vector<bool> alive;
-    vector<nodeSat> reason;
+    vector<int> reason;
     inline int toVar(int p) {return abs(p) - 1;}
 };
 

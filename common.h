@@ -23,5 +23,6 @@ typedef set<int> node;
 #define MCE_OUTPUT 1
 #define ANS_ANALYSIS 0
 #define REPEAT_ANALYSIS 0
+#define SAT_DEBUG 0
 #define FILE_NAME "super.edges"
 #endif //GRAD_BK_H
