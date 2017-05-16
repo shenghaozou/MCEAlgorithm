@@ -3,6 +3,10 @@
 #include "BKz.h"
 #include "BKz2.h"
 #include "BKz3.h"
+#include "BKz4.h"
+#include "BKz5.h"
+#include "BKz6.h"
+#include "BKz7.h"
 #include "experiment.h"
 
 void setPrint(set<int> x, string name);
@@ -11,7 +15,11 @@ void satTest();
 
 int main() 
 {
-    satTest();
+    //satTest();
+
+    MCE *alg = new BKz3();
+    alg -> run(10);
+
 
 
 /*

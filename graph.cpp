@@ -1,4 +1,6 @@
 #include "graph.h"
+#define FILTER_OFFSET 0
+void vectorDebug(vector<int> &d);
 
 void Graph::init(int vNum) {
     nodes = vNum;
@@ -37,9 +39,14 @@ void Graph::deleteNode(int i){
 }
 
 void Graph::filterBasedOnDegree() {
+    int sum = 0;
     for (int i = 0; i < nodes; i++)
-        if (live[i] && (int)(g[i].size()) < lb - 1) deleteNode(i);
+        if (live[i] && (int)(g[i].size()) < lb - 1 - FILTER_OFFSET){
+            deleteNode(i);
+            sum++;
+        }
     kill();
+    if(sum > 1) filterBasedOnDegree();
 }
 
 void Graph::filterBasedOnEdge(){
@@ -105,6 +112,7 @@ void Graph::filterBasedOnKcore() {//这里会修改图！需要复制一份过�
     vector<bool> livePoints(nodes);
     int* speedTest;
     int cur_core, max_core;
+
 #if GRAPH_DEBUG
     cout << "k-core simplification." << endl;
 #endif
@@ -157,6 +165,61 @@ void Graph::filterBasedOnKcore() {//这里会修改图！需要复制一份过�
             if (live[i] && coreNumber[i] < lb - 1) deleteNode(i);
             i++;
         }
+    }
+    kill();
+}
+
+
+
+void Graph::filterBasedOnKcore2() {//这里会修改图！需要复制一份过来！待修改！
+    coreNumber.resize(nodes);
+    degrees.resize(nodes);
+    vector<int> heap;
+    vector<vector<int>::iterator> heap_index(nodes);
+    int cur_core, max_core;
+    bool firstTime = true;
+    kill();//杀死所有度为0的点。
+    degrees = d;
+    for(int i = 0; i < nodes; i++) if (live[i]) heap.push_back(i);
+    make_heap(heap.begin(), heap.end(),
+    [&](int a, int b){
+        return g[a].size() > g[b].size();
+    });
+    for(vector<int>::iterator k = heap.begin(); k != heap.end(); k++) heap_index[*k] = k;
+
+
+    //vectorDebug(heap);
+
+    while(!heap.empty()){
+        int v = heap.front();
+        //vectorDebug(heap);
+        pop_heap(heap.begin(),heap.end());
+        heap.pop_back();
+        //vectorDebug(heap);
+        if(firstTime) {
+            cur_core = g[v].size();
+            coreNumber[v] = cur_core;
+            max_core = cur_core;
+            firstTime = false;
+        }
+        else{
+            if(degrees[v] > cur_core) cur_core = g[v].size();
+            if(cur_core > max_core) max_core = cur_core;
+            coreNumber[v] = cur_core;
+            if(degrees[v] == heap.size() || cur_core >= lb - 1){
+                for(vector<int>::iterator t = heap.begin(); t != heap.end(); t++) coreNumber[*t] = cur_core;
+                break;
+            }
+        }
+        if(cur_core < lb - 1) {
+            deleteNode(v);
+            live[v] = false;
+        }
+        make_heap(heap.begin(), heap.end(),
+                  [&](int a, int b){
+                      return g[a].size() > g[b].size();
+                  });
+
     }
     kill();
 }
@@ -255,5 +318,185 @@ void Graph::maximalClique(vector<int> &t) {
     }
 
 }
+
+void Graph::islandTest() {
+    vector<bool> tempLive(live);
+    queue<int> q;
+    int i = 0;
+    int sum = 0;
+    int lives = 0;
+    while(i < tempLive.size()) {
+        while (i < tempLive.size() && !tempLive[i]) i++;
+        if (i < tempLive.size()) {
+            q.push(i);
+            while (!q.empty()) {
+                int tmp = q.front();
+                q.pop();
+                if(tempLive[tmp]) {
+                    lives++;
+                    cout << "Dead:" << lives << endl;
+                    cout << tmp << endl;
+                    tempLive[tmp] = false;
+                    for (set<int>::iterator v = g[tmp].begin(); v != g[tmp].end(); v++) if (tempLive[*v]) q.push(*v);
+                }
+            }
+            sum = sum + 1;
+        }
+    }
+    cout << "isLandTest:" << sum << "Plz enter any key to continue." << endl;
+    char c;
+    cin >> c;
+}
+
+void Graph::matrixConvert() {
+    int maxDRes = 0;
+    matrixSize = 0;
+    assert(!matrixFlag);
+    matrixFlag = true;
+    matrixFirstTime = true;
+    for(int i = 0; i < live.size(); i++) if (live[i]) matrixSize++;
+    matrix.resize(matrixSize);
+    matrixc2r.clear();
+    matrixr2c.resize(nodes, -1);
+    d.resize(matrixSize, 0);
+    maxD = 0;
+
+    //cout << "MatrixSize:" << matrixSize << endl;
+
+    int r = 0;
+    for(int i = 0; i < matrixSize; i++) {
+        matrix[i].resize(matrixSize, false);
+        while(r < g.size() && !live[r]) r++;
+        matrixc2r.push_back(r);
+        matrixr2c[r] = i;
+        r++;
+    }
+    //assert(matrixc2r.size() == matrixSize);
+    //cout <<"maxtrixC2R:" << endl;
+    //vectorDebug(matrixc2r);
+
+    //map debug:
+
+
+
+    for(int i = 0; i < matrixSize; i++){
+        int rnum = matrixc2r[i];
+        for(set<int>::iterator v = g[rnum].begin(); v != g[rnum].end(); v++){
+            int num = *v;
+            int neinum = matrixr2c[num];
+            if(neinum != -1)
+            {
+                matrix[i][neinum] = true;
+                d[i]++;
+            }
+            if(d[i] > maxDRes){
+                maxDRes = d[i];
+                maxD = i;
+            }
+
+        }
+    }
+/*
+    cout << endl;
+    cout << "map debug"<< endl;
+    for(int i = 0; i < matrixSize; i++){
+        for(int j = 0; j < matrixSize; j++) cout << matrix[i][j]?"1":"0";
+        cout << endl;
+    }
+*/
+
+    live.resize(matrixSize, true);
+    levels.resize(matrixSize, 0);
+    matrixFirstLivePointer = 0;
+    cout << "Converted to Matrix." << endl;
+}
+
+void Graph::matrixConvert(vector<int> &P) {
+    int maxDRes = 0;
+    matrixSize = P.size();
+    assert(!matrixFlag);
+    matrixFlag = true;
+    matrixFirstTime = true;
+    matrix.resize(matrixSize);
+    matrixc2r.clear();
+    matrixr2c.resize(nodes, -1);
+    d.resize(matrixSize, 0);
+    maxD = 0;
+
+    //cout << "MatrixSize:" << matrixSize << endl;
+
+    int r = 0;
+
+    for(int i = 0; i < matrixSize; i++) {
+        matrix[i].resize(matrixSize, false);
+        matrixc2r.push_back(P[i]);
+        matrixr2c[P[i]] = i;
+    }
+    //assert(matrixc2r.size() == matrixSize);
+    //cout <<"maxtrixC2R:" << endl;
+    //vectorDebug(matrixc2r);
+
+    //map debug:
+
+
+
+    for(int i = 0; i < matrixSize; i++){
+        int rnum = matrixc2r[i];
+        for(set<int>::iterator v = g[rnum].begin(); v != g[rnum].end(); v++) {
+            int num = *v;
+            int neinum = matrixr2c[num];
+            if (neinum != -1) {
+                matrix[i][neinum] = true;
+                d[i]++;
+            }
+        }
+        if(d[i] < lb - 1) live[i] =false;
+        if(d[i] > maxDRes){
+            maxDRes = d[i];
+            maxD = i;
+        }
+
+    }
+/*
+    cout << endl;
+    cout << "map debug"<< endl;
+    for(int i = 0; i < matrixSize; i++){
+        for(int j = 0; j < matrixSize; j++) cout << matrix[i][j]?"1":"0";
+        cout << endl;
+    }
+*/
+
+
+    levels.resize(matrixSize, 0);
+    matrixFirstLivePointer = 0;
+    cout << "Converted to Matrix. MatrixSize:" << matrixSize << endl;
+
+}
+
+void Graph::basicInfo() {
+    int sum = 0;
+    int sum_e = 0;
+    int max_degree = 0;
+    int avg_degree = 0;
+    int min_degree = 100000;
+
+    for(int i = 0; i < nodes; i++) if(live[i]) sum++;
+    cout << "|V|:" << sum << endl;
+    for(int i = 0; i < nodes; i++){
+        if(live[i]){
+            sum_e += g[i].size();
+            if(g[i].size() > max_degree) max_degree = g[i].size();
+            if(g[i].size() < max_degree && g[i].size() != 0) min_degree = g[i].size();
+            avg_degree += g[i].size();
+        }
+    }
+    cout << "|E|:" << avg_degree / 2 << endl;
+    cout << "avg D:" << avg_degree / (double)sum << " | min D:" << min_degree << " | max D:" << max_degree << endl;
+}
+
+bool Graph::KcoreDegreesComp(int x, int y) {
+    if(g[x].size() > g[y].size()) return true; else return false;
+}
+
 
 

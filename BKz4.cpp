@@ -6,6 +6,9 @@
 
 #include "BKz4.h"
 #include "sat.h"
+void vectorDebug(vector<int> &d);
+void setDebug(set<int> &d);
+
 void quickSort(vector<int> &orders, vector<int> &degrees, int l,int r);
 
 void setPrint(set<int> x, string name);
@@ -52,7 +55,12 @@ void BKz4::pivotSelection2(set<int> &P,set <int> &X, vector<int> &P_Nu, int curr
     int index = 0;
     vector<int>occupied(currentLB - 1);
     vector<int>renumber(currentLB - 1);
-    //cout << "Start PivotSelection2" << endl;
+#if BK4_DEBUG
+    cout << "Start PivotSelection2" << endl;
+    cout << "Current P:";
+    setDebug(P);
+#endif
+
     fill(color.begin(), color.end(), -1);
 
     for(set<int>::iterator i = P.begin(); i != P.end(); i++){
@@ -98,7 +106,10 @@ void BKz4::pivotSelection2(set<int> &P,set <int> &X, vector<int> &P_Nu, int curr
             if (!successfulRenumber) P_Nu.push_back(c2r[i]);
         } else color[i] = selected;
     }
-    //cout << "Finish PivotSelection2" << endl;
+#if BK4_DEBUG
+    cout << "Finish PivotSelection2" << endl;
+#endif
+    if (lb - currentLB == 0) satGetBranch(c2r, r2c, color, P.size(), P_Nu, currentLB);
 }
 
 void BKz4::BronKerboschz(set<int> P, set<int> X, int recursiveCallCount)
@@ -128,7 +139,9 @@ void BKz4::BronKerboschz(set<int> P, set<int> X, int recursiveCallCount)
         if(P.size() > 0.008 * initP && lb - recursiveCallCount >= 3/*recursiveCallCount <= 0*/)
         {
             pivotSelection2(P, X, P_Nu, lb - recursiveCallCount);
+#if BK4_DEBUG
             cout << "P_size:" << P.size() << " level:" << recursiveCallCount << endl;
+#endif
         }
         else {
             set_union(P.begin(), P.end(), X.begin(), X.end(), inserter(PuX, PuX.end()));
@@ -184,32 +197,49 @@ void BKz4::satGetBranch(vector<int> &c2r, vector<int> &r2c, vector<int> &color, 
 
     for(int i = 0; i < c2r.size(); i++){
         int r = c2r[i];
-        tmpClause.clear();
-        tmpClause[0] = -(r + 1);
+        tmpClause[0] = -(i + 1);
         fill(neighbour.begin(), neighbour.end(), false);
+        neighbour[r] = true;
         for(set<int>::iterator v = g[r].begin(); v != g[r].end(); v++) neighbour[*v] = true;
-        for(int t = 0; t < graph.nodes; t++){
+        for(int t = r + 1; t < graph.nodes; t++){
             if(!neighbour[t] && graph.live[t] && r2c[t] != -1){
-                tmpClause[1] = -(t + 1);
+                tmpClause[1] = -(r2c[t] + 1);
+#if BK4_DEBUG
+                vectorDebug(tmpClause);
+#endif
                 s.addClause(tmpClause);
+
             }
         }
     }// add common clause
 
     for(int i = 0; i < color.size(); i++) if (color[i] != -1){
+#if BK4_DEBUG
         assert(color[i] < currentLB - 1);
-        colorClause[color[i]].push_back(c2r[i]);
+#endif
+        colorClause[color[i]].push_back(i + 1);
     }
 
-    for(int i = 0; i < colorClause.size(); i++) s.addClause(colorClause[i]);//add color clause
+    for(int i = 0; i < colorClause.size(); i++){
+        s.addClause(colorClause[i]);
+#if BK4_DEBUG
+        vectorDebug(colorClause[i]);
+#endif
+    }//add color clause
 
     for(int i = 0; i < P_Nu.size(); i++){
         int lit = r2c[P_Nu[i]] + 1;
         s.init(false);
         if(!s.up(lit)){
+            P_Nu[i] = -1;
+#if BK4_DEBUG
+            cout << "Lit:" << lit << "unsuccessfully up. Try to relax." << endl;
+#endif
             s.relax(lit);
         }
-        else P_Nu[i] = -1;
+#if BK4_DEBUG
+        else cout << "Lit:" << lit << "successfully up. " << endl;
+#endif
     }
 
     int i = 0;

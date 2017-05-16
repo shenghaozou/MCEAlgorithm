@@ -12,10 +12,10 @@ public:
         P.clear();
         X.clear();
         R.clear();
-        for(int t = 0; t < vNum; t++) graph.d[t] = graph.g[t].size();
         graph.filterBasedOnDegree();
-        graph.filterBasedOnKcore();
+        //graph.filterBasedOnKcore();
         //graph.filterBasedOnEdge();
+        //graph.filterBasedOnDegree();
         for(int t = 0; t < vNum; t++) graph.d[t] = graph.g[t].size();
         for (int i = 0; i < vNum;i++) if(graph.live[i]) P.insert(i);
 

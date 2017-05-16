@@ -13,12 +13,23 @@ public:
         X.clear();
         R.clear();
 
+
+
         for(int t = 0; t < vNum; t++) graph.d[t] = graph.g[t].size();
+        auto start = high_resolution_clock::now();
+        graph.basicInfo();
         graph.filterBasedOnDegree();
-        graph.filterBasedOnKcore();
+        //graph.basicInfo();
         graph.filterBasedOnEdge();
-        for(int t = 0; t < vNum; t++) graph.d[t] = graph.g[t].size();
-        for(int i = 0; i < vNum; i++) if(graph.live[i]) P.insert(i);
+        graph.filterBasedOnDegree();
+        //for(int t = 0; t < vNum; t++) graph.d[t] = graph.g[t].size();
+        //graph.filterBasedOnKcore2();
+        graph.basicInfo();
+        //graph.basicInfo();
+        //for(int t = 0; t < vNum; t++) graph.d[t] = graph.g[t].size();
+        //for(int i = 0; i < vNum; i++) if(graph.live[i]) P.insert(i);
+        cout << duration_cast<milliseconds>(high_resolution_clock::now() - start).count() << "ms\n";
+        //exit(0);
 
 
     }

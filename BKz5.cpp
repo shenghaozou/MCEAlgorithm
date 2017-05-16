@@ -4,44 +4,16 @@
 
 
 
-#include "BKz3.h"
+#include "BKz5.h"
+
+void vectorDebug(vector<int> &d);
+void setDebug(set<int> &d);
+
 void quickSort(vector<int> &orders, vector<int> &degrees, int l,int r);
 
 void setPrint(set<int> x, string name);
 
-void BKz3::pivotSelection(set<int> &P,set <int> &X, vector<int> &P_Nu, int currentLB)
-{
-
-    vector<int> r2c(graph.nodes, -1);
-    vector<int> c2r(P.size());
-    vector<int> remaining;
-    vector<node> &g = graph.g;
-    int index = 0;
-    vector<vector<bool>> color(
-            P.size(),
-            vector<bool>(currentLB - 1, true));
-
-    for(set<int>::iterator i = P.begin(); i != P.end(); i++){
-        int num = *i;
-        r2c[num] = index;
-        c2r[index] = num;
-        index++;
-    }
-
-    for(int i = 0; i < P.size(); i++){
-        int rnum = c2r[i];
-        int selected = 0;
-        while(selected < currentLB - 1 && !color[i][selected]) selected++;
-        if(selected >= currentLB - 1) P_Nu.push_back(c2r[i]);
-        else
-            for(set<int>::iterator v = g[rnum].begin(); v != g[rnum].end(); v++){
-                int cnum = r2c[*v];
-                if(cnum != -1) color[cnum][selected] = false;
-            }
-    }
-}
-
-void BKz3::pivotSelection2(set<int> &P,set <int> &X, vector<int> &P_Nu, int currentLB)
+void BKz5::pivotSelection2(set<int> &P,set <int> &X, vector<int> &P_Nu, int currentLB)
 {
 
     vector<int> r2c(graph.nodes, -1);
@@ -51,7 +23,12 @@ void BKz3::pivotSelection2(set<int> &P,set <int> &X, vector<int> &P_Nu, int curr
     int index = 0;
     vector<int>occupied(currentLB - 1);
     vector<int>renumber(currentLB - 1);
-    //cout << "Start PivotSelection2" << endl;
+#if BK4_DEBUG
+    cout << "Start PivotSelection2" << endl;
+    cout << "Current P:";
+    setDebug(P);
+#endif
+
     fill(color.begin(), color.end(), -1);
 
     for(set<int>::iterator i = P.begin(); i != P.end(); i++){
@@ -73,7 +50,7 @@ void BKz3::pivotSelection2(set<int> &P,set <int> &X, vector<int> &P_Nu, int curr
         if (selected >= currentLB - 1)
         {
             bool successfulRenumber = false;
-            for(int newColor = 0; newColor < currentLB - 1; newColor++){ 
+            for(int newColor = 0; newColor < currentLB - 1; newColor++){
                 if (occupied[newColor] >= 0) {
                     fill(renumber.begin(), renumber.end(), true);
                     renumber[newColor] = false;
@@ -97,10 +74,12 @@ void BKz3::pivotSelection2(set<int> &P,set <int> &X, vector<int> &P_Nu, int curr
             if (!successfulRenumber) P_Nu.push_back(c2r[i]);
         } else color[i] = selected;
     }
-    //cout << "Finish PivotSelection2" << endl;
+#if BK5_DEBUG
+    cout << "Finish PivotSelection2" << endl;
+#endif
 }
 
-void BKz3::BronKerboschz(set<int> P, set<int> X, int recursiveCallCount)
+void BKz5::BronKerboschz(set<int> P, set<int> X, int recursiveCallCount)
 {
     vector<node> &g = graph.g;
     vector<bool> &live = graph.live;
@@ -122,14 +101,18 @@ void BKz3::BronKerboschz(set<int> P, set<int> X, int recursiveCallCount)
     P_Nu.clear();
 
 
-    //if (P.size() + R.size() < lb) return;
+    if (P.size() + R.size() < lb) return;
     if(P.size() != 0) {
-        //if(P.size() > 0.008 * initP && lb - recursiveCallCount >= 3/*recursiveCallCount <= 0*/)
-        //{
-        //    pivotSelection2(P, X, P_Nu, lb - recursiveCallCount);
-        //    cout << "P_size:" << P.size() << " level:" << recursiveCallCount << endl;
-        //}
-        //else {
+        /*
+        if(P.size() > 0.008 * initP && lb - recursiveCallCount >= 3)
+        {
+            pivotSelection2(P, X, P_Nu, lb - recursiveCallCount);
+#if BK4_DEBUG
+            cout << "P_size:" << P.size() << " level:" << recursiveCallCount << endl;
+#endif
+        }
+        else {
+            */
             set_union(P.begin(), P.end(), X.begin(), X.end(), inserter(PuX, PuX.end()));
             set<int>::iterator puxt = PuX.begin();
             set_difference(P.begin(), P.end(), g[*puxt].begin(), g[*puxt].end(), inserter(P_Nu, P_Nu.end()));
@@ -137,7 +120,7 @@ void BKz3::BronKerboschz(set<int> P, set<int> X, int recursiveCallCount)
             cout << "Current u:" << *puxt << endl;
             setPrint(P_Nu,"P-N(u)");
 #endif
-        //}
+
     }
 
     for(vector<int>::iterator v = P_Nu.begin(); v != P_Nu.end(); v++){
@@ -170,6 +153,35 @@ void BKz3::BronKerboschz(set<int> P, set<int> X, int recursiveCallCount)
             int temp = *v;
             X.insert(temp);
             P.erase(temp);
+        }
+    }
+}
+
+void BKz5::solve() {
+    vector<bool> tempLive(graph.live);
+    vector<node> &g = graph.g;
+    queue<int> q;
+    int i = 0;
+    int sum = 0;
+    int lives = 0;
+    while(i < tempLive.size()) {
+        while (i < tempLive.size() && !tempLive[i]) i++;
+        if (i < tempLive.size()) {
+            q.push(i);
+            P.clear();
+            while (!q.empty()) {
+                int tmp = q.front();
+                q.pop();
+                if(tempLive[tmp]) {
+                    P.insert(tmp);
+                    tempLive[tmp] = false;
+                    for (set<int>::iterator v = g[tmp].begin(); v != g[tmp].end(); v++) if (tempLive[*v]) q.push(*v);
+                }
+            }
+            X.clear();
+            initP = P.size();
+            if (P.size() >= lb) BronKerboschz(P, X, recursiveCount);
+            sum = sum + 1;
         }
     }
 }

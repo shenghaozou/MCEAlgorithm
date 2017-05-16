@@ -18,6 +18,8 @@ void Sat::addClause(vector<int> &t, bool rlx) {
         else negWatches[toVar(num)].push_back(index);
         data[index].push_back(num);
     }
+
+    assert(data.size() < 2147483647);
 }
 
 void Sat::init(bool firstTime) {//after add Clause
@@ -44,7 +46,7 @@ bool Sat::up(int t) {
         int n = n_.lit;
 #if SAT_DEBUG
         cout << "Current:" << n << " Reason Clause:" << n_.reasonClause << endl;
-        debug();
+        //debug();
 #endif
         q.pop();
         tmp.var = toVar(n);

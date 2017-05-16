@@ -32,25 +32,11 @@ void BKz::BronKerboschz(set<int> R, set<int> P, set<int> X, int recursiveCallCou
 
     set<int> PuX;
     set<int> P_Nu;
-    int maxDegreePoint;
-    int maxDegree;
+
     PuX.clear();
     P_Nu.clear();
     set_union(P.begin(), P.end(), X.begin(), X.end(), inserter(PuX, PuX.end()));
 
-    maxDegreePoint = 0;
-    maxDegree = 0;
-    /*
-    if(PuX.size() != 0) {
-        for(set<int>::iterator puxt = PuX.begin(); puxt != PuX.end(); puxt++){
-            if(graph.d[*puxt] > maxDegree){
-                maxDegree = graph.d[*puxt];
-                maxDegreePoint = *puxt;
-            }
-        }
-        set_difference(P.begin(), P.end(), g[maxDegreePoint].begin(), g[maxDegreePoint].end(), inserter(P_Nu, P_Nu.end()));
-    }
-     */
 
     if (P.size() + R.size() < lb) return;
     // This is for lb <= 2!!!
@@ -64,34 +50,6 @@ void BKz::BronKerboschz(set<int> R, set<int> P, set<int> X, int recursiveCallCou
 #endif
     }
 
-
-/*
-    set<int> _P_Nu;
-    if(PuX.size() != 0){
-        if(lb >= 3 + R.size()) {
-            getBranch(P_Nu, P, lb - R.size() - 1);
-
-            set<int>::iterator puxt = _P_Nu.begin();
-            set_difference(_P_Nu.begin(), _P_Nu.end(), g[*puxt].begin(), g[*puxt].end(), inserter(P_Nu, P_Nu.end()));
-#if DEBUG
-            cout << "Current u:" << *puxt << endl;
-            setPrint(P, "current P");
-            setPrint(_P_Nu,"colored P");
-            setPrint(P_Nu,"P-N(u)");
-#endif
-
-        }
-        else{
-            set<int>::iterator puxt = PuX.begin();
-            set_difference(P.begin(), P.end(), g[*puxt].begin(), g[*puxt].end(), inserter(P_Nu, P_Nu.end()));
-#if DEBUG
-            cout << "Current u:" << *puxt << endl;
-        setPrint(P_Nu,"P-N(u)");
-#endif
-        }
-    }
-
-*/
 
     for(set<int>::iterator v = P_Nu.begin(); v != P_Nu.end(); v){
         set<int> v_;	//create a singleton set {v}
