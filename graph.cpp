@@ -7,8 +7,12 @@ void Graph::init(int vNum) {
     g.resize(vNum);
     live.resize(vNum);
     d.resize(vNum);
+    changeFlag[0].resize(vNum);
+    changeFlag[1].resize(vNum);
     fill(live.begin(), live.end(), true);
     for(int i = 0; i < vNum; i++) g[i].clear();
+    filterBasedOnDegreeLastSum = 0;
+    filterBasedOnEdgeLastSum = 0;
 };
 
 void Graph::print() {
@@ -35,10 +39,23 @@ void Graph::deleteNode(int i){
         for(set<int>::iterator v = g[i].begin(); v != g[i].end(); v++) if(live[*v]) g[*v].erase(i);
         g[i].clear();
     }
+}
+
+void Graph::deleteNode_(int i, int selector){
+#if GRAPH_DEBUG
+    cout << "Point Deleted:" << i << endl;
+#endif
+    if(live[i]){
+        for(set<int>::iterator v = g[i].begin(); v != g[i].end(); v++) if(live[*v]) {
+                g[*v].erase(i);
+                changeFlag[selector][*v] = true;
+            }
+        g[i].clear();
+    }
 
 }
 
-void Graph::filterBasedOnDegree() {
+bool Graph::filterBasedOnDegree() {
     int sum = 0;
     for (int i = 0; i < nodes; i++)
         if (live[i] && (int)(g[i].size()) < lb - 1 - FILTER_OFFSET){
@@ -46,12 +63,31 @@ void Graph::filterBasedOnDegree() {
             sum++;
         }
     kill();
+    if(sum == 0) return false;
     if(sum > 1) filterBasedOnDegree();
+    return true;
 }
 
-void Graph::filterBasedOnEdge(){
+
+bool Graph::filterBasedOnDegree_(int recorder) {//运行前清空数组
+    int sum = 0;
+    for (int i = 0; i < nodes; i++)
+        if (live[i] && (int)(g[i].size()) < lb - 1){
+            deleteNode_(i, recorder);
+            sum++;
+        }
+    kill();
+    if(sum == 0) return false;
+    if(sum > 1) filterBasedOnDegree_(recorder);
+    return true;
+}
+
+
+
+bool Graph::filterBasedOnEdge(bool special){
     vector<int> pool(nodes);
     bool flag;
+    bool retFlag = false;
     int erased;
     pool.clear();
     fill(pool.begin(), pool.end(), -1);
@@ -75,10 +111,54 @@ void Graph::filterBasedOnEdge(){
 #endif
                         g[i].erase(num);
                         g[num].erase(i);
+                        if (special){
+                            changeFlag[0][i] = true;
+                            changeFlag[0][num] = true;
+                        }
+                        retFlag = true;
                     }
                 } else v++;
         }
     kill();
+    return retFlag;
+}
+
+bool Graph::filterBasedOnEdge_(int recorder) {
+    vector<int> pool(nodes);
+    bool flag;
+    bool retFlag = false;
+    int erased;
+    pool.clear();
+    fill(pool.begin(), pool.end(), -1);
+    for(int i = 0; i < nodes; i++) if(live[i] && changeFlag[1 - recorder][i]){
+            for(set<int>::iterator v = g[i].begin(); v != g[i].end(); v++) if(live[*v]) pool[*v] = i;
+            for(set<int>::iterator v = g[i].begin(); v != g[i].end(); v) if(live[*v] && i < (*v) && changeFlag[1 - recorder][*v]){
+                    int num = *v;
+                    int sum = 0;
+                    bool delFlag = true;
+                    for(set<int>::iterator t = g[num].begin(); t != g[num].end(); t++)
+                        if(live[*t]  && pool[*t] >= i) {
+                            sum++;
+                            if(sum >= lb - 2) {
+                                delFlag = false;
+                                break;
+                            }
+                        }
+                    v++;
+                    if(delFlag){
+#if GRAPH_DEBUG
+                        cout << "Erased Edge:" << i << "," << num << endl;
+#endif
+                        g[i].erase(num);
+                        g[num].erase(i);
+                        changeFlag[recorder][i] = true;
+                        changeFlag[recorder][num] = true;
+                        retFlag = true;
+                    }
+                } else v++;
+        }
+    kill();
+    return retFlag;
 }
 
 bool degreeCompare(vector<int> g, int a, int b)
@@ -479,6 +559,7 @@ void Graph::basicInfo() {
     int max_degree = 0;
     int avg_degree = 0;
     int min_degree = 100000;
+    double v,e;
 
     for(int i = 0; i < nodes; i++) if(live[i]) sum++;
     cout << "|V|:" << sum << endl;
@@ -490,13 +571,44 @@ void Graph::basicInfo() {
             avg_degree += g[i].size();
         }
     }
-    cout << "|E|:" << avg_degree / 2 << endl;
+    sum_e = avg_degree / 2;
+    cout << "|E|:" <<  sum_e << endl;
+    v = sum;
+    e = sum_e;
+
+    cout << "density:" << e / (((v - 1) * v) / 2.0) << endl;
     cout << "avg D:" << avg_degree / (double)sum << " | min D:" << min_degree << " | max D:" << max_degree << endl;
+
 }
 
 bool Graph::KcoreDegreesComp(int x, int y) {
     if(g[x].size() > g[y].size()) return true; else return false;
 }
 
+void Graph::filterMixed() {
+    bool flag = true;
+    while(flag){
+        filterBasedOnDegree();
+        basicInfo();
+        flag = filterBasedOnEdge();
+        basicInfo();
+    }
+}
 
+void Graph::filterMixed_() {
+    bool flag = true;
+    int recorder = 0;
+    filterBasedOnDegree();
+    filterBasedOnEdge();
+    filterBasedOnDegree();
+    fill(changeFlag[0].begin(), changeFlag[0].end(), false);
+    fill(changeFlag[1].begin(), changeFlag[1].end(), false);
+    filterBasedOnEdge(true);
 
+    while(flag){
+        filterBasedOnDegree_(recorder);
+        flag = filterBasedOnEdge_(1 - recorder);
+        fill(changeFlag[recorder].begin(), changeFlag[recorder].end(), false);
+        recorder = 1 - recorder;
+    }
+}

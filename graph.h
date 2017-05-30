@@ -2,15 +2,17 @@
 using namespace std::placeholders;
 #ifndef GRAD_GRAPH_H
 #define GRAD_GRAPH_H
-
+#define FILTER_BASED_ON_DEGREE_THRESHOLD 0.4
+#define FILTER_BASED_ON_EDGE_THRESHOLD 0.4
 class Graph
 {
-	private:
-        int lb = 0;
 	public:
+		int lb = 0;
 		int nodes;
+		double coloringThreshold = 0.1;
         bool matrixFlag = false;
         bool matrixFirstTime;
+		vector<bool> changeFlag[2];
 		vector<node> g;
         vector<bool> live;
 		vector<int> coreNumber;
@@ -36,9 +38,18 @@ class Graph
 			g[n2_].insert(n1_);
 		}
 		void print();
-        void filterBasedOnDegree();
-        void filterBasedOnEdge();
+
+		bool filterBasedOnDegree();
+		bool filterBasedOnDegree_(int recorder);
+		bool filterBasedOnDegreeLastSum;
+
+        bool filterBasedOnEdge(bool special = false);
+		bool filterBasedOnEdge_(int recorder);
+		bool filterBasedOnEdgeLastSum;
+
         void filterBasedOnKcore();
+		void filterMixed();
+		void filterMixed_();
         void filterBasedOnKcore2();
         bool KcoreDegreesComp(int, int);
 
@@ -46,6 +57,7 @@ class Graph
 		void islandTest();
 		int kcoreMini();
         void deleteNode(int);
+		void deleteNode_(int, int);
         void kill();
 		void maximalClique(vector<int> &t);
         void matrixConvert();

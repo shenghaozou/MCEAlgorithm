@@ -28,5 +28,5 @@ typedef set<int> node;
 #define SAT_DEBUG 0
 #define BK4_DEBUG 0
 #define BK5_DEBUG 0
-#define FILE_NAME "socd.edges"
+#define FILE_NAME "ca-citeseer.edges"
 #endif //GRAD_BK_H

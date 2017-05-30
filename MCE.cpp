@@ -83,6 +83,7 @@ void MCE::run(int i) {
     auto start = high_resolution_clock::now();
     init();
     fo.open("ans.txt");
+    cout << "Start Run:" << i << endl;
     graph.setLowerBound(i);
     lb = i;//just for debug! lb = i;
     preprocessing();

@@ -12,12 +12,16 @@ public:
         P.clear();
         X.clear();
         R.clear();
+        auto start = high_resolution_clock::now();
+        graph.basicInfo();
         graph.filterBasedOnDegree();
         //graph.filterBasedOnKcore();
-        //graph.filterBasedOnEdge();
-        //graph.filterBasedOnDegree();
+        graph.filterBasedOnEdge();
+        graph.filterBasedOnDegree();
         for(int t = 0; t < vNum; t++) graph.d[t] = graph.g[t].size();
         for (int i = 0; i < vNum;i++) if(graph.live[i]) P.insert(i);
+        graph.basicInfo();
+        cout << duration_cast<milliseconds>(high_resolution_clock::now() - start).count() << "ms\n";
 
 
     }
